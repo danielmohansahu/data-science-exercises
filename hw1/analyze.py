@@ -62,8 +62,12 @@ def visualize_ctr_by_age(df):
     axs[0].get_xaxis().set_visible(False)
     for ax in axs:
         for text in ax.get_legend().texts:
-            text.set_text("Female" if text.get_text() == "0" else "Male")
-    plt.show()
+            if text.get_text() == "-1":
+                text.set_text("Unknown")
+            elif text.get_text() == "0":
+                text.set_text("Female")
+            else:
+                text.set_text("Male")
 
 if __name__ == "__main__":
     ### data loading
@@ -91,8 +95,9 @@ if __name__ == "__main__":
         new = frame.dropna()
         # drop invalid ages (we allow 0 - it's equivalent to not signed in)
         new = new[new["Age"] >= 0]
-        # drop unsupported genders and cast as a string
+        # introduce a third category of gender (unknown) based on Age heuristic
         new = new[new["Gender"].between(0,1,inclusive="both")]
+        new["Gender"] = new.apply(lambda r: -1 if r["Age"] == 0 else r["Gender"], axis=1)
         # drop invalid impressions
         new = new[new["Impressions"] >= 0]
         # drop invalid clicks
@@ -110,6 +115,12 @@ if __name__ == "__main__":
     data = new_data
     print(f"Removed {dropped} rows ({dropped / total * 100.0}%)")
 
+    ### Miscellaneous Visualization
+    sns.pairplot(data=data[11], hue="Gender")
+
     ### Part A:
     visualize_ctr_by_age(data[11])
+
+    ### Miscellaneous Visualization
+    plt.show()
 
