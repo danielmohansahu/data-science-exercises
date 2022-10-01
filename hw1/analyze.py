@@ -19,17 +19,14 @@ from matplotlib import pyplot as plt
 # global hardcoded constants
 DATAPATH = "data/"
 LABELS = set(("Age", "Gender", "Impressions", "Clicks", "Signed_In"))
+GROUPS = ["<18","18-24","25-34","35-44","45-54","55-64","65+","???"]
 
-def visualize_ctr_by_age(df):
+def bin_by_age(df):
     """ Plot the distributions of number impressions and click-through-rate
 
-    (a) Create a new variable, age_group, that categorizes users as “<18”, ”18-24”, ”25-34”, ”35-44”, ”45-54”, “55-64” and “65+”.
-    (b)
-        (i) Plot (CTR=# clicks/# impressions), for these 6 age categories.
-        (ii) Define a new variable to segment or categorize users based on their click behavior.
+    Create a new variable, age_group, that categorizes users as “<18”, ”18-24”, ”25-34”, ”35-44”, ”45-54”, “55-64” and “65+”.
     """
     # convenience binning function
-    labels = ["<18","18-24","25-34","35-44","45-54","55-64","65+","???"]
     def bin_by_age(age):
         if age == 0:
             return "???"
@@ -52,11 +49,17 @@ def visualize_ctr_by_age(df):
     df["Age_Group"] = df.apply(lambda r: bin_by_age(r["Age"]), axis=1)
     df["CTR"] = df.apply(lambda r: 0 if r["Impressions"] == 0 else r["Clicks"] / r["Impressions"], axis=1)
 
+def visualize_by_age(df):
+    """ Plot the distributions of number impressions and click-through-rate
+
+    (i) Plot (CTR=# clicks/# impressions), for these 6 age categories.
+    (ii) Define a new variable to segment or categorize users based on their click behavior.
+    """
     # plot desired information as subplots
     fig,axs = plt.subplots(2,1)
     fig.suptitle("Impressions and CTR by Age")
-    sns.barplot(data=df, ax=axs[0], x="Age_Group", y="CTR", hue="Gender", order=labels)
-    sns.barplot(data=df, ax=axs[1], x="Age_Group", y="Impressions", hue="Gender", order=labels)
+    sns.barplot(data=df, ax=axs[0], x="Age_Group", y="CTR", hue="Gender", order=GROUPS)
+    sns.barplot(data=df, ax=axs[1], x="Age_Group", y="Impressions", hue="Gender", order=GROUPS)
 
     # update display options
     axs[0].get_xaxis().set_visible(False)
@@ -68,6 +71,37 @@ def visualize_ctr_by_age(df):
                 text.set_text("Female")
             else:
                 text.set_text("Male")
+
+def collect_metrics(df, results):
+    """ Collect our suite of metrics for a single day.
+
+    Each new set of metrics (per demographic) is added to
+    the results dataframe.
+    """
+    # first time initialization
+    metrics = ("Age_Group", "Count", "CTR_Mean", "CTR_Stddev", "Clicks_Mean", "Clicks_Stddev", "Impressions_Mean", "Impressions_Stddev")
+    if results is None:
+        results = pandas.DataFrame(columns=metrics)
+
+    # add metrics for each demographic
+    for group in GROUPS:
+        # filter based on age group
+        subset = df[df["Age_Group"] == group]
+        # create a new frame with our metric data
+        frame = pandas.DataFrame([{
+            "Age_Group": group,
+            "Count": subset.shape[0],
+            "CTR_Mean": subset["CTR"].mean(),
+            "CTR_Stddev": subset["CTR"].std(),
+            "Clicks_Mean": subset["Clicks"].mean(),
+            "Clicks_Stddev": subset["Clicks"].std(),
+            "Impressions_Mean": subset["Impressions"].mean(),
+            "Impressions_Stddev": subset["Impressions"].std()}])
+        # concatenate with other results
+        results = pandas.concat([results, frame])
+
+    # return collected results
+    return results
 
 if __name__ == "__main__":
     ### data loading
@@ -115,12 +149,28 @@ if __name__ == "__main__":
     data = new_data
     print(f"Removed {dropped} rows ({dropped / total * 100.0}%)")
 
-    ### Miscellaneous Visualization
-    sns.pairplot(data=data[11], hue="Gender")
+    ### Part A / B: Visualize a single day split into age groups.
+    print("Binning data by age group...")
+    for frame in tqdm.tqdm(data):
+        bin_by_age(frame)
 
-    ### Part A:
-    visualize_ctr_by_age(data[11])
+    # only visualize one (hopefully representative!) datum
+    visualize_by_age(data[1])
+
+    ### Part C: Collect Metrics
+    print("Collecting metrics...")
+    metrics = None
+    for frame in tqdm.tqdm(data):
+        metrics = collect_metrics(frame, metrics)
+
+    # display metrics
+    sns.pairplot(data=metrics, hue="Age_Group", hue_order=GROUPS)
 
     ### Miscellaneous Visualization
+    # sns.pairplot(data=data[11], hue="Gender")
+    # sns.pairplot(data=data[11], hue="Age_Group", hue_order=GROUPS)
     plt.show()
+
+    import code
+    code.interact(local=locals())
 
