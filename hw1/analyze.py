@@ -72,14 +72,14 @@ def visualize_by_age(df):
             else:
                 text.set_text("Male")
 
-def collect_metrics(df, results):
+def collect_metrics(day, df, results):
     """ Collect our suite of metrics for a single day.
 
     Each new set of metrics (per demographic) is added to
     the results dataframe.
     """
     # first time initialization
-    metrics = ("Age_Group", "Count", "CTR_Mean", "CTR_Stddev", "Clicks_Mean", "Clicks_Stddev", "Impressions_Mean", "Impressions_Stddev")
+    metrics = ("Day", "Age_Group", "Count", "CTR_Mean", "CTR_Stddev", "Clicks_Mean", "Clicks_Stddev", "Impressions_Mean", "Impressions_Stddev")
     if results is None:
         results = pandas.DataFrame(columns=metrics)
 
@@ -89,6 +89,7 @@ def collect_metrics(df, results):
         subset = df[df["Age_Group"] == group]
         # create a new frame with our metric data
         frame = pandas.DataFrame([{
+            "Day": day,
             "Age_Group": group,
             "Count": subset.shape[0],
             "CTR_Mean": subset["CTR"].mean(),
@@ -160,8 +161,8 @@ if __name__ == "__main__":
     ### Part C: Collect Metrics
     print("Collecting metrics...")
     metrics = None
-    for frame in tqdm.tqdm(data):
-        metrics = collect_metrics(frame, metrics)
+    for i,frame in tqdm.tqdm(enumerate(data)):
+        metrics = collect_metrics(i+1, frame, metrics)
 
     # display metrics
     sns.pairplot(data=metrics, hue="Age_Group", hue_order=GROUPS)
@@ -170,7 +171,3 @@ if __name__ == "__main__":
     # sns.pairplot(data=data[11], hue="Gender")
     # sns.pairplot(data=data[11], hue="Age_Group", hue_order=GROUPS)
     plt.show()
-
-    import code
-    code.interact(local=locals())
-
