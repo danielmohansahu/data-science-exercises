@@ -17,7 +17,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 # global hardcoded constants
-DATAPATH = "data/"
+DATAPATH = "data/nyt/"
 LABELS = set(("Age", "Gender", "Impressions", "Clicks", "Signed_In"))
 GROUPS = ["<18","18-24","25-34","35-44","45-54","55-64","65+","???"]
 
@@ -119,6 +119,8 @@ if __name__ == "__main__":
         else:
             data.append(day)
     print(f"Loaded {len(data)} files.")
+    if len(data) == 0:
+        sys.exit(0)
 
     ### data cleaning
     print("Pruning data...")
