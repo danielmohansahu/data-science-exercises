@@ -7,6 +7,7 @@ Date extracted from:
 
 # STL
 import glob
+from collections import Counter
 
 # Data Science Tools
 import pandas
@@ -58,15 +59,34 @@ if __name__ == "__main__":
     dataframe["body_camera"] = raw_dataframe["body_camera"]
 
     # bin the following rows into more manageable categories
+    dataframe["year"] = dataframe["date"].apply(lambda r: int(r[:4]))
     dataframe["region"] = raw_dataframe["state"].apply(lambda r: STATE_MAP[r])
     dataframe["weapon"] = raw_dataframe["armed"].fillna("unarmed").apply(lambda r: WEAPON_MAP[r] if r in WEAPON_MAP else "OTHER")
+    dataframe["armed"] = dataframe["weapon"].apply(lambda r: r != "NONE")
     dataframe["escaping"] = raw_dataframe["flee"].fillna("Not fleeing").apply(lambda r: FLEEING_MAP[r])
 
-    ### Miscellaneous Visualization
-    sns.pairplot(data=dataframe, hue="gender")
+    # collect mapping from YEAR -> COUNT used throughout visualizations
+    count_by_year = dataframe.groupby(by=["year"]).count().reset_index().to_dict('list')
+    count_by_year = { k:v for k,v in zip(count_by_year["year"], count_by_year["date"]) }
+
+    ### Visualizations
+
+    # figure 0: pairplot, for general understanding
+    sns.pairplot(data=dataframe, hue="race")
+
+    # figure 1: plotting the change over time for various groupings of data
+    plt.figure("Count by Race over Time")
+    year_race_count = dataframe[["year", "race"]].dropna()
+    year_race_count["pct"] = 0
+    year_race_count = year_race_count.groupby(by=["year","race"]).count().reset_index()
+    year_race_count["pct"] = year_race_count.apply(lambda r: 100.0 * r["pct"] / count_by_year[r["year"]], axis=1)
+    sns.heatmap(year_race_count.pivot("race", "year", "pct"), annot=True)
+
+
+
 
     plt.show()
 
     print(f"Columns: {dataframe.columns}")
-    import code
-    code.interact(local=locals())
+    # import code
+    # code.interact(local=locals())
