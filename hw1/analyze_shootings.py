@@ -41,6 +41,16 @@ FLEEING_MAP = {
     "Foot": True, "Car": True, "Other": True
 }
 
+def plot_year_heatmap(df, count_by_year, column):
+    """ Visualize the change over time ('year') for the given column.
+    """
+    # figure 1: plotting the change over time for various groupings of data
+    subframe = dataframe[["year", column]]
+    subframe["pct"] = 0
+    subframe = subframe.groupby(by=["year", column]).count().reset_index()
+    subframe["pct"] = subframe.apply(lambda r: 100.0 * r["pct"] / count_by_year[r["year"]], axis=1)
+    sns.heatmap(subframe.pivot(column, "year", "pct"), annot=True)
+
 if __name__ == "__main__":
     ### data loading
     print(f"Loading {FILENAME}...")
@@ -53,7 +63,7 @@ if __name__ == "__main__":
     dataframe["date"] = raw_dataframe["date"]
     dataframe["age"] = raw_dataframe["age"]
     dataframe["gender"] = raw_dataframe["gender"]
-    dataframe["race"] = raw_dataframe["race"]
+    dataframe["race"] = raw_dataframe["race"].fillna("O")
     dataframe["threat_level"] = raw_dataframe["threat_level"]
     dataframe["signs_of_mental_illness"] = raw_dataframe["signs_of_mental_illness"]
     dataframe["body_camera"] = raw_dataframe["body_camera"]
@@ -64,6 +74,9 @@ if __name__ == "__main__":
     dataframe["weapon"] = raw_dataframe["armed"].fillna("unarmed").apply(lambda r: WEAPON_MAP[r] if r in WEAPON_MAP else "OTHER")
     dataframe["armed"] = dataframe["weapon"].apply(lambda r: r != "NONE")
     dataframe["escaping"] = raw_dataframe["flee"].fillna("Not fleeing").apply(lambda r: FLEEING_MAP[r])
+
+    # drop all unhandled NaNs
+    dataframe = dataframe.dropna()
 
     # collect mapping from YEAR -> COUNT used throughout visualizations
     count_by_year = dataframe.groupby(by=["year"]).count().reset_index().to_dict('list')
@@ -76,17 +89,21 @@ if __name__ == "__main__":
 
     # figure 1: plotting the change over time for various groupings of data
     plt.figure("Count by Race over Time")
-    year_race_count = dataframe[["year", "race"]].dropna()
-    year_race_count["pct"] = 0
-    year_race_count = year_race_count.groupby(by=["year","race"]).count().reset_index()
-    year_race_count["pct"] = year_race_count.apply(lambda r: 100.0 * r["pct"] / count_by_year[r["year"]], axis=1)
-    sns.heatmap(year_race_count.pivot("race", "year", "pct"), annot=True)
+    plot_year_heatmap(dataframe, count_by_year, "race")
 
+    # figure 2: plotting the change over time based on geographic region
+    plt.figure("Count by Region over Time")
+    plot_year_heatmap(dataframe, count_by_year, "region")
 
+    # figure 3: plotting the change over time based on weapon
+    plt.figure("Count by Weapon over Time")
+    plot_year_heatmap(dataframe, count_by_year, "weapon")
 
+    # figure 4: plot age distribution vs. armed state
+    g = sns.catplot(data=dataframe, x="weapon", y="age", kind="violin", inner=None)
+    sns.swarmplot(data=dataframe, x="weapon", y="age", size=1, color='k', ax=g.ax)
 
     plt.show()
 
-    print(f"Columns: {dataframe.columns}")
     # import code
     # code.interact(local=locals())
