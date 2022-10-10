@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{titling}
 \usepackage{graphicx}
+\usepackage{enumitem}
 \usepackage[colorlinks=true]{hyperref}
 
 \setlength{\droptitle}{-6em}
@@ -23,8 +24,58 @@
 \maketitle
 \begin{enumerate}[leftmargin=\labelsep]
 \item \textbf{Downloaded housing data from ELMS.}
+
+  N/A
+
 \item \textbf{Predicting 2013 house cost via Linear Regression with State information.}
+
+  Linear Regression is generally straightforward, but in our case there is a pre-process required because State information is categorical - there's no way to interpret it sequentially. To handle this we convert our single variable (State) into N different boolean variables (e.g. CA vs. Not CA, DC vs. Not DC). One interpretation of this is that we're fitting N different lines to each subset of data corresponding to a single state.
+
+  \begin{enumerate}[label=(\alph*)]
+  \item What is the intercept? What does it correspond to?
+
+    The intercept is 12.563. In a line (\(y = mx + b\)) this is the \(b\), or the point at which this intercepts the Y axis. In our case we're using categorical information so the Y axis interpretation is less useful. Instead we must combine this with the coefficient information for a given state to interpret it properly.
+
+  \item How do you get this information from your regression?
+
+    This information is embedded in the regression model itself.
+
+  \item Based on your regression coefficients, what states have the most and least expensive average homes?
+
+    Based on regression coefficients the most expensive "state" is the District of Columbia (Washington DC) with a regression coefficient of (0.45). The cheapest state is West Virginia with a coefficient of (-1.20). We can use the coefficient itself as a proxy for home cost, because the predictive model for a home in the given state is given by:
+
+      \[ cost = e^{coefficient + intercept} \]
+
+    Note that the \(x\) in \(y = mx + b\) is 1.0.
+
+  \item How do you get this information from your regression?
+
+    The coefficient information, like the intercept, is embedded directly in the trained regression model. In order to find each state specific coefficient we simply find the corresponding index of the dummy state variable (i.e. the feature "DC or Not DC").
+
+  \item What is the average price of homes in those states?
+
+    Using the formula in section (c) we get:
+
+    The average price of homes in DC is:
+
+      \[ e^{coefficient + intercept} = e^{0.45 + 12.563} \approx \$450,900 \]
+
+    The average price of homes in WV is:
+
+      \[ e^{coefficient + intercept} = e^{-1.2 + 12.563} \approx \$85,733 \]
+
+  \item How do you get this information from your regression?
+
+    This information is directly extracted via knowledge of the linear regression model type (linear) and the pre-processing step we used to avoid overfitting to expensive homes (the natural logarithm).
+
+  \end{enumerate}
+
 \item \textbf{Predicting 2013 house cost via Linear Regression with State and County information.}
+
+  \begin{enumerate}[label=(\alph*)]
+  \item What US counties have the highest and lowest regression coefficients? Why?
+  \end{enumerate}
+
 \item \textbf{Kaggle Housing Contest submission.}
 \item \textbf{Probability Exercise: Ball Selection}
 
