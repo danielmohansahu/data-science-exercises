@@ -1,0 +1,65 @@
+% Adapted from
+%  https://www.overleaf.com/latex/templates/pitt-state-physics-homework-template/wdsxknmntnxk
+
+\documentclass[12pt]{article}
+\usepackage[paper=letterpaper,margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{newtxtext, newtxmath}
+\usepackage{enumitem}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage[colorlinks=true]{hyperref}
+
+\setlength{\droptitle}{-6em}
+
+% Enter the specific assignment number and topic of that assignment below, and replace "Your Name" with your actual name.
+\title{ENPM808W Homework \#2}
+\author{Daniel M. Sahu}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{enumerate}[leftmargin=\labelsep]
+\item Downloaded housing data from ELMS.
+\item Predicting 2013 house cost via Linear Regression with State information.
+\item Predicting 2013 house cost via Linear Regression with State and County information.
+\item Kaggle Housing Contest submission.
+\item Probability Exercise: Ball Selection
+
+  Given:
+    \[ P(W | B1) = 2/3 \]
+    \[ P(W | B2) = 3/4 \]
+    \[ P(B1) = P(B2) = 1/2 \]
+
+  Where \(P(W)\) is the probability of selecting a White ball, \(P(B1)\) is the probability of selecting Bag \#1, and \(P(B2)\) is the probability of selecting Bag \#2.
+  Since the full suite of possibilities is covered by \(P(B1)\) and \(P(B2)\) (i.e. \( P(B1) + P(B2) = 0.5 \)), we can calculate the probability of selecting a White ball as:
+
+    \[ P(W) = P(W | B1) P(B1) + P(W | B2) P(B2) \]
+    \[ P(W) = 2/3 * 1/2 + 3/4 * 1/2 = 17/24 \]
+
+  The chance of randomly selecting a White ball is \(P(W) = 17/24\).
+
+\item Probability Exercise: Soccer Scores
+
+  Given:
+    \[ P(W | G) = 0.6 \]
+    \[ P(W | NG) = 0.1 \]
+    \[ P(G) = 0.3 \]
+
+  Where \(P(W)\) is the probability of Winning, \(P(G)\) is the probability of getting the first goal, and \(P(NG)\) is the probability of not getting the first goal.
+  
+  As stated this problem is underconstrained and cannot be answered. This is because there is no information given about the prevalence of tied games. We make the simplifying assumption that tie games \emph{never} occur, which makes the problem tractable. This effectively gives us the following constraining equation:
+
+    \[ P(NG) = 0.7 \]
+
+  Now that the full suite of possible cases is known, we can formulate the probability of winning as:
+
+    \[ P(W) = P(W | G) P(G) + P(W | NG) P(NG) \]
+    \[ P(W) = 0.6 * 0.3 + 0.1 * 0.7 = 0.25 \]
+
+    The chance of this team winning any given game is roughly 25\%. We say "roughly" because the problem statement says "the team scores the first goal \emph{about} 30\% of the time" (emphasis mine).
+
+\end{enumerate}
+\end{document}
