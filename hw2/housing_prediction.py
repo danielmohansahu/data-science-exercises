@@ -25,14 +25,11 @@ TRAINFILE = "data/house_train.csv"
 TESTFILE = "data/house_test.csv"
 VERBOSE = True
 
-def fit_linear_model(df, x_columns, y_column="price2013"):
+def fit_linear_model(X, Y):
     """ Construct a Linear Regression model to the given dataframe.
     """
-    # handle categorical data for inputs
-    X = pd.get_dummies(data=df[x_columns], drop_first=True)
-
     # split into test / train sets
-    X_train, X_test, Y_train, Y_test = train_test_split(X, df[y_column], test_size = .20)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = .20)
 
     # convert Y values to log form, to prevent overweighting of expensive homes
     Y_train = np.log(Y_train)
@@ -86,7 +83,16 @@ if __name__ == "__main__":
         plt.show()
 
     # build a simple linear regression model for price based on state
-    lr_state = fit_linear_model(df_train, ["state"], "price2013")
+    X_state = pd.get_dummies(data=df_train[["state"]], drop_first=True)
+    Y_state = df_train["price2013"]
+    lr_state = fit_linear_model(X_state, Y_state)
+
+    # determine which state corresponds to what coefficient
+    coeffs = [(coef, state.replace("state_","")) for state,coef in zip(X_state.columns, lr_state.coef_)]
+    print("State-based regression:")
+    print(f"\tIntercept: {lr_state.intercept_}")
+    print(f"\tPriciest state: {max(coeffs)[-1]}")
+    print(f"\tCheapest state: {min(coeffs)[-1]}")
 
     # print model summary
     import code
