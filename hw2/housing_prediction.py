@@ -46,19 +46,19 @@ def fit_linear_model(X, Y):
         Y_test_pred = lr.predict(X_test)
 
         # Plot residuals
-        plt.scatter(Y_train_pred, Y_train_pred - Y_train, c="blue", marker="s", label="Training data")
-        plt.scatter(Y_test_pred, Y_test_pred - Y_test, c="blue", marker="s", label="Test data")
+        plt.scatter(np.exp(Y_train_pred), Y_train_pred - Y_train, c="blue", marker="s", label="Training data")
+        plt.scatter(np.exp(Y_test_pred), Y_test_pred - Y_test, c="blue", marker="s", label="Test data")
         plt.title("State Linear Regression Residuals")
-        plt.xlabel("Predicted values")
+        plt.xlabel("Predicted values ($)")
         plt.ylabel("Residuals")
         plt.show()
         
         # Plot predictions
-        plt.scatter(Y_train_pred, Y_train, c="blue", marker="s", label="Training data")
-        plt.scatter(Y_test_pred, Y_test, c="blue", marker="s", label="Testing data")
+        plt.scatter(np.exp(Y_train_pred), np.exp(Y_train), c="blue", marker="s", label="Training data")
+        plt.scatter(np.exp(Y_test_pred), np.exp(Y_test), c="blue", marker="s", label="Testing data")
         plt.title("Linear regression")
-        plt.xlabel("Predicted Prices (log)")
-        plt.ylabel("Actual Prices (log)")
+        plt.xlabel("Predicted Prices ($)")
+        plt.ylabel("Actual Prices ($)")
         plt.show()
 
     # return the model for evaluation / visualization
@@ -88,11 +88,22 @@ if __name__ == "__main__":
     lr_state = fit_linear_model(X_state, Y_state)
 
     # determine which state corresponds to what coefficient
-    coeffs = [(coef, state.replace("state_","")) for state,coef in zip(X_state.columns, lr_state.coef_)]
+    coeffs_state = [(coef, state.replace("state_","")) for state,coef in zip(X_state.columns, lr_state.coef_)]
     print("State-based regression:")
     print(f"\tIntercept: {lr_state.intercept_}")
-    print(f"\tPriciest state: {max(coeffs)[-1]}")
-    print(f"\tCheapest state: {min(coeffs)[-1]}")
+    print(f"\tPriciest state: {max(coeffs_state)[-1]}")
+    print(f"\tCheapest state: {min(coeffs_state)[-1]}")
+
+    # build a simple linear regression model for price based on state and county information
+    X_county = pd.get_dummies(data=df_train[["state", "county"]], drop_first=True)
+    Y_county = df_train["price2013"]
+    lr_county = fit_linear_model(X_county, Y_county)
+
+    # determine the coefficients for counties
+    coeffs_county = [(coef, county.replace("county_","")) for county,coef in zip(X_county.columns, lr_county.coef_) if "county" in county]
+    print("County-based regression:")
+    print(f"\tPriciest county: {max(coeffs_county)[-1]}")
+    print(f"\tCheapest county: {min(coeffs_county)[-1]}")
 
     # print model summary
     import code
