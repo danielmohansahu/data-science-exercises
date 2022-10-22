@@ -57,6 +57,11 @@ if __name__ == "__main__":
     df_train = pd.read_csv(TRAINFILE)
     df_test = pd.read_csv(TESTFILE)
 
+    # convert all prices to log scale, to avoid overweighting expensive homes
+    df_train["price2007"] = np.log(df_train["price2007"])
+    df_train["price2013"] = np.log(df_train["price2013"])
+    df_test["price2007"] = np.log(df_test["price2007"])
+
     # feature construction - adding a weighted distance metric
     #  this feature is an attempt to account for the relative
     #  price of cities that are geographically near the current
@@ -81,7 +86,7 @@ if __name__ == "__main__":
     # plot results (from training set)
     Y_train_pred = lr.predict(X_train)
 
-    plt.scatter(Y_train_pred, Y_train, c="blue", marker="s", label="Training data")
+    plt.scatter(np.exp(Y_train_pred), np.exp(Y_train), c="blue", marker="s", label="Training data")
     plt.title("Linear regression")
     plt.xlabel("Predicted Prices ($)")
     plt.ylabel("Actual Prices ($)")
@@ -89,6 +94,11 @@ if __name__ == "__main__":
     
     # format output prediction for test data
     Y_test_pred = lr.predict(df_test[["cost_weighted_dist", "poverty", "price2007"]])
+
+    # dump to a csv
+    Y_results = df_test[["id"]]
+    Y_results["prediction"] = np.exp(Y_test_pred)
+    Y_results.to_csv("prediction.csv", index=False)
     
     import code
     code.interact(local=locals())
