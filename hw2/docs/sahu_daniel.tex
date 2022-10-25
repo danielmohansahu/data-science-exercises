@@ -74,9 +74,28 @@
 
   \begin{enumerate}[label=(\alph*)]
   \item What US counties have the highest and lowest regression coefficients? Why?
+
+    The U.S. county with the lowest regression coefficient is Meriwether, and the highest is Anchorage. This is slightly more complicated to explain than the purely State-based regression model developed in Question \#2, because the total cost of a given location is contingent on both the State and County weights. In this case the most intuitive representation is that Anchorage represents a very expensive county such that the county weight must, well, out-weight the state regression coefficient. Similarly it's possible that Meriwether represents a very cheap county in a very rich state, as opposed to a globally minimally expensive County. The presence of multiple variables significantly complicates the interpretation of the data.
+
   \end{enumerate}
 
 \item \textbf{Kaggle Housing Contest submission.}
+
+  My submission model is a linear regressor using 3 features:
+  \begin{enumerate}
+    \item poverty (provided)
+    \item price2007 (provided, logarithm taken)
+    \item weighted cost based on location
+  \end{enumerate}
+
+  The last feature is the main innovation of this submission. It is a weighted sum of the log of the distance from the zip code of the city to all other cities (calculated via the python pgeocode library), with the weight being the 2007 home price of each other city. The purpose of this feature is to encode continuous location information into the regression model. 
+
+  Contest information:
+  \begin{enumerate}
+    \item Username: dsahu\_117007190
+    \item Score: 100140.46757
+  \end{enumerate}
+
 \item \textbf{Probability Exercise: Ball Selection}
 
   Given:
